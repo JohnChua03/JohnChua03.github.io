@@ -1,243 +1,185 @@
-import { useEffect, useRef } from "react";
-import { motion, useScroll, useTransform } from "framer-motion";
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>John Chua — Portfolio</title>
+  <meta name="description" content="Electrical Engineering student portfolio: embedded systems, power electronics, projects, and contact." />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --bg:#0b1020; --panel:#0f172a; --card:#111b33; --text:#e5ecff; --muted:#a6b3d6; --border:#1f2a44; --accent:#7dd3fc; --accent-2:#a78bfa; --ring:rgba(125,211,252,.25)
+    }
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial;background:radial-gradient(1200px 600px at 10% -10%, rgba(167,139,250,.12), transparent),radial-gradient(900px 500px at 110% 0%, rgba(125,211,252,.10), transparent),var(--bg);color:var(--text)}
 
-// === John Chua — Animated Portfolio (React + Tailwind + Framer Motion) ===
-// Notes:
-// - This is a single React component you can drop into a Vite/Next/CRA app.
-// - Tailwind is assumed (the preview here includes it). If not, you can swap classes for plain CSS.
-// - Animations: subtle entrance on scroll, parallax hero, hover lift on cards.
+    /* Layout */
+    .container{max-width:1040px;margin:0 auto;padding:0 20px}
+    header{position:sticky;top:0;z-index:40;background:rgba(11,16,32,.65);backdrop-filter:saturate(150%) blur(8px);border-bottom:1px solid rgba(255,255,255,.06)}
+    .nav{display:flex;align-items:center;justify-content:space-between;padding:14px 0}
+    .brand{font-weight:800;letter-spacing:.3px}
+    .nav a{color:var(--muted);text-decoration:none;margin-left:18px;font-weight:600}
+    .nav a:hover{color:var(--text)}
 
-export default function PortfolioSite() {
-  const heroRef = useRef(null);
-  const { scrollYProgress } = useScroll({ target: heroRef, offset: ["start start", "end start"] });
-  const y = useTransform(scrollYProgress, [0, 1], [0, -80]);
-  const opacity = useTransform(scrollYProgress, [0, 1], [1, 0.75]);
+    section{padding:48px 0}
+    h1{font-size:42px;line-height:1.15;margin:0 0 12px}
+    h2{font-size:26px;margin:0 0 16px}
+    p{line-height:1.6}
 
-  const sections = [
-    { id: "projects", label: "Projects" },
-    { id: "about", label: "About" },
-    { id: "contact", label: "Contact" },
-  ];
+    /* Hero */
+    .hero{display:grid;grid-template-columns:1.2fr .8fr;gap:28px;align-items:center;padding-top:72px}
+    .lead{color:var(--muted);font-size:18px}
+    .chips{display:flex;gap:10px;flex-wrap:wrap;margin:18px 0 26px}
+    .chip{padding:6px 10px;border-radius:999px;background:rgba(255,255,255,.06);border:1px solid var(--border);color:var(--muted);font-size:13px}
+    .btn{display:inline-block;border:1px solid rgba(255,255,255,.14);color:var(--text);background:linear-gradient(180deg,#0f203a,#0d1a30);padding:12px 16px;border-radius:12px;text-decoration:none;font-weight:700;box-shadow:0 0 0 0 var(--ring);transition:box-shadow .2s, transform .15s}
+    .btn:hover{box-shadow:0 0 0 6px var(--ring);transform:translateY(-1px)}
+    .btn.primary{background:linear-gradient(180deg,#2aa0f1,#1e8cda)}
 
-  const projectCards = [
-    {
-      tag: "Python • DSP",
-      title: "Automatic Music Transcriber",
-      body: "Real-time note detection using FFT; streams audio and maps to musical notes.",
-      link: "#",
-    },
-    {
-      tag: "MATLAB/Simulink • Haptics",
-      title: "Teleoperation (Quanser Omni)",
-      body: "Leader–follower joint-space control with trajectory record/replay and PID tuning.",
-      link: "#",
-    },
-    {
-      tag: "STM32 • Power",
-      title: "DC–DC Buck Controller",
-      body: "PWM-based regulation; ripple measurement and efficiency characterization across loads.",
-      link: "#",
-    },
-  ];
+    .panel{background:var(--card);border:1px solid rgba(255,255,255,.06);border-radius:16px;padding:16px}
+    .kpi{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+    .kpi .panel{text-align:center}
+    .kpi .val{font-size:26px;font-weight:800}
+    .kpi .sub{color:var(--muted);font-size:12px}
 
-  return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 text-slate-100">
-      <Header sections={sections} />
+    /* Cards */
+    .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+    .card{background:var(--card);border:1px solid rgba(255,255,255,.07);border-radius:16px;padding:18px;display:flex;flex-direction:column;gap:10px;transform:translateZ(0);transition:transform .18s ease, box-shadow .2s}
+    .card:hover{transform:translateY(-4px);box-shadow:0 10px 30px rgba(0,0,0,.35)}
+    .tag{font-size:12px;color:var(--muted)}
+    .card h3{margin:0;font-size:18px}
+    .card p{margin:0;color:var(--muted);font-size:14px}
+    .card a{margin-top:auto;align-self:flex-start}
 
-      {/* HERO */}
-      <section ref={heroRef} id="home" className="relative overflow-hidden">
-        {/* Blurry gradient blobs */}
-        <motion.div
-          aria-hidden
-          className="pointer-events-none absolute -top-24 -left-16 h-72 w-72 rounded-full bg-fuchsia-500/20 blur-3xl"
-          animate={{ y: [0, 16, -8, 0], scale: [1, 1.05, 1], rotate: [0, 8, -6, 0] }}
-          transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
-        />
-        <motion.div
-          aria-hidden
-          className="pointer-events-none absolute -bottom-24 -right-16 h-80 w-80 rounded-full bg-sky-500/20 blur-3xl"
-          animate={{ y: [0, -20, 10, 0], scale: [1, 1.08, 1], rotate: [0, -10, 6, 0] }}
-          transition={{ duration: 12, repeat: Infinity, ease: "easeInOut" }}
-        />
+    /* Two columns */
+    .twocol{display:grid;grid-template-columns:1fr 1fr;gap:16px}
 
-        <div className="mx-auto grid max-w-6xl grid-cols-1 gap-10 px-5 pb-20 pt-28 md:grid-cols-2 md:gap-12">
-          <motion.div style={{ y, opacity }} className="flex flex-col justify-center">
-            <h1 className="text-4xl font-extrabold tracking-tight sm:text-5xl">
-              John Chua
-            </h1>
-            <p className="mt-3 max-w-xl text-lg text-slate-300">
-              Electrical Engineering student focused on <span className="font-semibold text-sky-300">embedded systems</span> &
-              <span className="font-semibold text-fuchsia-300"> power electronics</span>. I build real-time control projects and practical hardware–software systems.
-            </p>
-            <div className="mt-5 flex flex-wrap gap-2">
-              {"Python C C++ STM32 MATLAB/Simulink PSpice".split(" ").map((s) => (
-                <span key={s} className="rounded-full border border-slate-700/60 bg-slate-800/60 px-3 py-1 text-sm text-slate-300">
-                  {s}
-                </span>
-              ))}
-            </div>
-            <div className="mt-6 flex flex-wrap gap-3">
-              <a href="#projects" className="rounded-xl bg-sky-500 px-4 py-2 font-semibold text-slate-950 shadow-md shadow-sky-500/30 transition hover:translate-y-[-2px] hover:bg-sky-400">
-                See Projects
-              </a>
-              <a href="mailto:jchua100103@gmail.com" className="rounded-xl border border-slate-700 bg-slate-900 px-4 py-2 font-semibold text-slate-100 transition hover:translate-y-[-2px] hover:border-slate-600">
-                Email Me
-              </a>
-            </div>
-          </motion.div>
+    /* Footer */
+    footer{padding:44px 0 60px;color:var(--muted);border-top:1px solid rgba(255,255,255,.06);margin-top:40px}
 
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, amount: 0.4 }}
-            transition={{ duration: 0.6 }}
-            className="relative"
-          >
-            <div className="rounded-3xl border border-slate-800 bg-slate-900/60 p-6 shadow-2xl shadow-black/30 ring-1 ring-white/5">
-              <div className="grid grid-cols-3 gap-3">
-                {Array.from({ length: 9 }).map((_, i) => (
-                  <motion.div
-                    key={i}
-                    className="aspect-square rounded-2xl bg-gradient-to-br from-slate-800 to-slate-700"
-                    whileHover={{ scale: 1.03 }}
-                    transition={{ type: "spring", stiffness: 240, damping: 18 }}
-                  />
-                ))}
-              </div>
-              <p className="mt-4 text-sm text-slate-400">Aesthetic placeholder — replace with screenshots or a short project collage.</p>
-            </div>
-          </motion.div>
-        </div>
-      </section>
+    /* Entrance fade for sections */
+    @keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+    section{animation:fadeUp .6s ease both}
 
-      {/* PROJECTS */}
-      <section id="projects" className="mx-auto max-w-6xl px-5 py-10">
-        <div className="mb-6 flex items-end justify-between">
-          <h2 className="text-2xl font-bold">Projects</h2>
-          <a href="#" className="text-sm font-semibold text-slate-300 underline-offset-4 hover:underline">
-            View all on GitHub
-          </a>
-        </div>
+    /* Responsive */
+    @media (max-width: 900px){
+      .hero{grid-template-columns:1fr}
+      .grid{grid-template-columns:1fr}
+      .twocol{grid-template-columns:1fr}
+    }
 
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
-          {projectCards.map((p, idx) => (
-            <motion.article
-              key={p.title}
-              initial={{ opacity: 0, y: 18 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, amount: 0.3 }}
-              transition={{ duration: 0.5, delay: idx * 0.06 }}
-              className="group flex h-full flex-col rounded-2xl border border-slate-800 bg-slate-900/60 p-5 shadow-lg shadow-black/20"
-            >
-              <span className="text-xs uppercase tracking-wide text-slate-400">{p.tag}</span>
-              <h3 className="mt-1 text-lg font-semibold">{p.title}</h3>
-              <p className="mt-1 text-sm text-slate-300/90">{p.body}</p>
-              <div className="mt-4 flex items-center gap-2">
-                <a
-                  href={p.link}
-                  className="rounded-lg border border-slate-700 bg-slate-800 px-3 py-1.5 text-sm font-semibold text-slate-100 transition group-hover:-translate-y-[2px] hover:border-slate-600"
-                >
-                  Open
-                </a>
-              </div>
-            </motion.article>
-          ))}
-        </div>
-      </section>
-
-      {/* ABOUT */}
-      <section id="about" className="mx-auto max-w-6xl px-5 py-10">
-        <div className="grid grid-cols-1 items-start gap-6 md:grid-cols-2">
-          <motion.div
-            initial={{ opacity: 0, y: 16 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, amount: 0.4 }}
-            transition={{ duration: 0.55 }}
-          >
-            <h2 className="text-2xl font-bold">About</h2>
-            <p className="mt-2 max-w-prose text-slate-300">
-              I'm an EE student at SFSU interested in embedded systems, control, and power conversion. I like building small,
-              practical systems and documenting what I learn. This site focuses on clarity, speed, and subtle motion.
-            </p>
-            <ul className="mt-4 grid grid-cols-2 gap-2 text-sm text-slate-300/90">
-              <li className="rounded-lg border border-slate-800 bg-slate-900/60 px-3 py-2">Python, C, C++</li>
-              <li className="rounded-lg border border-slate-800 bg-slate-900/60 px-3 py-2">STM32, PWM/ADC</li>
-              <li className="rounded-lg border border-slate-800 bg-slate-900/60 px-3 py-2">MATLAB/Simulink</li>
-              <li className="rounded-lg border border-slate-800 bg-slate-900/60 px-3 py-2">PSpice, Xilinx</li>
-            </ul>
-          </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0, y: 16 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, amount: 0.4 }}
-            transition={{ duration: 0.55, delay: 0.12 }}
-            className="rounded-2xl border border-slate-800 bg-slate-900/60 p-5"
-          >
-            <h3 className="text-lg font-semibold">Highlights</h3>
-            <ul className="mt-2 list-disc space-y-1 pl-5 text-sm text-slate-300">
-              <li>Teleoperation system (Quanser Omni) with joint-space control & PID tuning</li>
-              <li>Music Transcriber (Python/FFT) — real-time frequency analysis</li>
-              <li>DC–DC buck controller (STM32) — ripple & efficiency testing</li>
-            </ul>
-          </motion.div>
-        </div>
-      </section>
-
-      {/* CONTACT */}
-      <section id="contact" className="mx-auto max-w-6xl px-5 py-12">
-        <motion.div
-          initial={{ opacity: 0, y: 16 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, amount: 0.4 }}
-          transition={{ duration: 0.55 }}
-          className="rounded-3xl border border-slate-800 bg-gradient-to-br from-slate-900/80 to-slate-900/50 p-6 shadow-xl" >
-          <div className="flex flex-col items-start justify-between gap-6 md:flex-row md:items-center">
-            <div>
-              <h2 className="text-2xl font-bold">Contact</h2>
-              <p className="mt-1 max-w-prose text-slate-300">Email me and I'll reply as soon as I can. You can also find me on GitHub or LinkedIn.</p>
-            </div>
-            <div className="flex flex-col gap-2">
-              <a href="mailto:jchua100103@gmail.com" className="rounded-xl bg-sky-500 px-4 py-2 text-center font-semibold text-slate-950 transition hover:-translate-y-[2px] hover:bg-sky-400">Email</a>
-              <a href="https://github.com/yourusername" target="_blank" className="rounded-xl border border-slate-700 bg-slate-900 px-4 py-2 text-center font-semibold text-slate-100 transition hover:-translate-y-[2px]">GitHub</a>
-              <a href="https://linkedin.com/in/yourprofile" target="_blank" className="rounded-xl border border-slate-700 bg-slate-900 px-4 py-2 text-center font-semibold text-slate-100 transition hover:-translate-y-[2px]">LinkedIn</a>
-            </div>
-          </div>
-        </motion.div>
-      </section>
-
-      <Footer />
+    /* Respect reduced motion */
+    @media (prefers-reduced-motion: reduce){
+      *{animation:none !important;transition:none !important}
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container nav">
+      <div class="brand">John Chua</div>
+      <nav>
+        <a href="#projects">Projects</a>
+        <a href="#about">About</a>
+        <a href="#contact">Contact</a>
+        <a href="resume.pdf" target="_blank">Resume</a>
+      </nav>
     </div>
-  );
-}
+  </header>
 
-function Header({ sections }: { sections: { id: string; label: string }[] }) {
-  return (
-    <header className="sticky top-0 z-50 w-full border-b border-slate-800/80 bg-slate-950/70 backdrop-blur supports-[backdrop-filter]:bg-slate-950/50">
-      <div className="mx-auto flex max-w-6xl items-center justify-between px-5 py-3">
-        <a href="#home" className="text-sm font-extrabold tracking-wider text-slate-100">JOHN CHUA</a>
-        <nav className="flex items-center gap-2">
-          {sections.map((s) => (
-            <a key={s.id} href={`#${s.id}`} className="rounded-lg px-3 py-1.5 text-sm font-semibold text-slate-300 transition hover:bg-slate-800/70 hover:text-white">
-              {s.label}
-            </a>
-          ))}
-          <a href="/resume.pdf" target="_blank" className="rounded-lg px-3 py-1.5 text-sm font-semibold text-slate-300 transition hover:bg-slate-800/70 hover:text-white">
-            Resume
-          </a>
-        </nav>
+  <main class="container">
+    <!-- HERO -->
+    <section class="hero">
+      <div>
+        <h1>Electrical Engineering student focused on embedded systems & power electronics.</h1>
+        <p class="lead">Hands-on with STM32 microcontrollers, MATLAB/Simulink, and signal processing. I build real-time control systems and practical hardware–software projects.</p>
+        <div class="chips">
+          <span class="chip">Python</span>
+          <span class="chip">C/C++</span>
+          <span class="chip">STM32</span>
+          <span class="chip">MATLAB/Simulink</span>
+          <span class="chip">PSpice</span>
+        </div>
+        <div class="cta">
+          <a class="btn primary" href="#projects">See Projects</a>
+          <a class="btn" href="mailto:jchua100103@gmail.com">Email Me</a>
+        </div>
       </div>
-    </header>
-  );
-}
+      <div class="panel">
+        <div class="kpi">
+          <div class="panel"><div class="val">4+</div><div class="sub">Projects</div></div>
+          <div class="panel"><div class="val">3 yrs</div><div class="sub">SFSU EE</div></div>
+          <div class="panel"><div class="val">2025</div><div class="sub">Graduation</div></div>
+        </div>
+      </div>
+    </section>
 
-function Footer() {
-  return (
-    <footer className="border-t border-slate-800/80">
-      <div className="mx-auto flex max-w-6xl items-center justify-between px-5 py-6 text-sm text-slate-400">
-        <span>© {new Date().getFullYear()} John Chua</span>
-        <span>Built with React, Tailwind & Framer Motion</span>
+    <!-- PROJECTS -->
+    <section id="projects">
+      <h2>Projects</h2>
+      <div class="grid">
+        <article class="card">
+          <span class="tag">Python • DSP</span>
+          <h3>Automatic Music Transcriber</h3>
+          <p>Real-time note detection using FFT and frequency analysis. Converts guitar audio into musical notes.</p>
+          <a class="btn" href="#" target="_blank">View Code</a>
+        </article>
+        <article class="card">
+          <span class="tag">MATLAB/Simulink • Haptics</span>
+          <h3>Teleoperation (Quanser Omni)</h3>
+          <p>Leader–follower teleoperation with joint-space position control, trajectory record/replay, and PID tuning.</p>
+          <a class="btn" href="#" target="_blank">Project Docs</a>
+        </article>
+        <article class="card">
+          <span class="tag">STM32 • Power</span>
+          <h3>DC–DC Buck Converter Control</h3>
+          <p>PWM-based voltage regulation with ripple measurement and efficiency characterization across loads.</p>
+          <a class="btn" href="#" target="_blank">Overview</a>
+        </article>
       </div>
-    </footer>
-  );
-}
+    </section>
+
+    <!-- ABOUT -->
+    <section id="about" class="twocol">
+      <div>
+        <h2>About</h2>
+        <p>I'm an EE student at SFSU interested in embedded systems, power conversion, and control. I enjoy building practical systems that blend analog sensing with real-time firmware.</p>
+        <p>When I'm not in the lab, you'll find me documenting builds, tuning controllers, or exploring signal processing.</p>
+      </div>
+      <div class="panel">
+        <h3>Skills</h3>
+        <ul>
+          <li>Programming: Python, C, C++</li>
+          <li>Tools: MATLAB/Simulink, Keil, Xilinx, PSpice</li>
+          <li>Hardware: STM32, sensor interfacing, PWM, ADC</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- CONTACT -->
+    <section id="contact" class="twocol">
+      <div>
+        <h2>Contact</h2>
+        <p>Email: <a href="mailto:jchua100103@gmail.com">jchua100103@gmail.com</a><br/>
+           GitHub: <a href="https://github.com/yourusername" target="_blank">github.com/yourusername</a><br/>
+           LinkedIn: <a href="https://linkedin.com/in/yourprofile" target="_blank">linkedin.com/in/yourprofile</a></p>
+      </div>
+      <div class="panel">
+        <h3>Resume</h3>
+        <p>Place a <code>resume.pdf</code> in this folder so the link works:</p>
+        <a class="btn" href="resume.pdf" target="_blank">Open Resume</a>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="container">© <span id="y"></span> John Chua • Built with HTML/CSS • Hosted on GitHub Pages</div>
+  </footer>
+  <script>
+    // Just for the year stamp
+    document.getElementById('y').textContent = new Date().getFullYear();
+  </script>
+</body>
+</html>
