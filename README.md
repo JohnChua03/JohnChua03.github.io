@@ -163,8 +163,7 @@
       <div>
         <h2>Contact</h2>
         <p>Email: <a href="mailto:jchua100103@gmail.com">jchua100103@gmail.com</a><br/>
-           GitHub: <a href="https://github.com/yourusername" target="_blank">github.com/yourusername</a><br/>
-           LinkedIn: <a href="https://linkedin.com/in/yourprofile" target="_blank">linkedin.com/in/yourprofile</a></p>
+           GitHub: <a href="https://github.com/JohnChua03" target="_blank">github.com/JohnChua03</a><br/>
       </div>
       <div class="panel">
         <h3>Resume</h3>
